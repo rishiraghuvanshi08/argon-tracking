@@ -19,6 +19,8 @@
 // reactstrap components
 import { useSelector } from "react-redux";
 import { Card, CardBody, CardTitle, Container, Row, Col } from "reactstrap";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faSpinner } from '@fortawesome/free-solid-svg-icons'
 
 const Header = () => {
   const { users, isLoading, error } = useSelector((state) => ({
@@ -26,8 +28,8 @@ const Header = () => {
     isLoading: state.userList.isLoading,
     error: state.userList.error,
   }));
-  const { projects } = useSelector((state) => state.projectList);
-  const { teams } = useSelector((state) => state.teamsList);
+  const { projects, isLoadingProject } = useSelector((state) => state.projectList);
+  const { teams, isLoadingTeam } = useSelector((state) => state.teamsList);
   const totalProjects = projects.length;
   const totalTeams = teams.length;
   const totalUsers = users.length;
@@ -50,7 +52,10 @@ const Header = () => {
                           Total Users
                         </CardTitle>
                         <span className="h2 font-weight-bold mb-0">
-                          {totalUsers}
+                          {isLoading ?
+                            <p style={{ fontStyle: "italic", color: "#aaa" }}>
+                              <FontAwesomeIcon icon={faSpinner} spin />
+                            </p> : totalUsers}
                         </span>
                       </div>
                       <Col className="col-auto">
@@ -79,7 +84,11 @@ const Header = () => {
                         >
                           Total Projects
                         </CardTitle>
-                        <span className="h2 font-weight-bold mb-0">{totalProjects}</span>
+                        <span className="h2 font-weight-bold mb-0">
+                          {isLoadingProject ?
+                            <p style={{ fontStyle: "italic", color: "#aaa" }}>
+                              <FontAwesomeIcon icon={faSpinner} spin />
+                            </p> : totalProjects}</span>
                       </div>
                       <Col className="col-auto">
                         <div className="icon icon-shape bg-warning text-white rounded-circle shadow">
@@ -107,7 +116,11 @@ const Header = () => {
                         >
                           Total Teams
                         </CardTitle>
-                        <span className="h2 font-weight-bold mb-0">{totalTeams}</span>
+                        <span className="h2 font-weight-bold mb-0">
+                          {isLoadingTeam ?
+                            <p style={{ fontStyle: "italic", color: "#aaa" }}>
+                              <FontAwesomeIcon icon={faSpinner} spin />
+                            </p> : totalTeams}</span>
                       </div>
                       <Col className="col-auto">
                         <div className="icon icon-shape bg-yellow text-white rounded-circle shadow">

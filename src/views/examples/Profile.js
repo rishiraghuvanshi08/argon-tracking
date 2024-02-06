@@ -47,8 +47,6 @@ import Header from "../../components/Headers/Header";
 
 const Profile = () => {
   const { users, error } = useSelector((state) => state.userList);
-  const { projects } = useSelector((state) => state.projectList);
-  const { teams } = useSelector((state) => state.teamsList);
   const navigate = useNavigate();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -57,8 +55,6 @@ const Profile = () => {
   const [show, setShow] = useState(false);
   const handleClose = () => setShow(false);
   const dispatch = useDispatch();
-  const totalProjects = projects.length;
-  const totalTeams = teams.length;
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [passwordData, setPasswordData] = useState({
     oldPassword: "",

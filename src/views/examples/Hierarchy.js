@@ -49,6 +49,8 @@ import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { createMuiTheme, makeStyles, ThemeProvider } from "@material-ui/core/styles";
 import { toast } from "react-toastify";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faSpinner } from '@fortawesome/free-solid-svg-icons'
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -74,6 +76,7 @@ const useStyles = makeStyles((theme) => ({
 
 function Organization({ org, onCollapse, collapsed, onDrop }) {
     const classes = useStyles();
+    const { isLoadingHeirarchy } = useSelector((state) => state.viewHierarchy);
 
     // const [{ canDrop, isOver }, drop] = useDrop({
     //   accept: "ORGANIZATION",
@@ -133,27 +136,31 @@ function Organization({ org, onCollapse, collapsed, onDrop }) {
         >
             <CardHeader
                 avatar={
-                    <Tooltip title={`${_.size(org?.subordinates)}`} arrow>
-                        <Badge
-                            style={{ cursor: "pointer" }}
-                            color="secondary"
-                            anchorOrigin={{
-                                vertical: "bottom",
-                                horizontal: "right"
-                            }}
-                            showZero
-                            invisible={!collapsed}
-                            overlap="circle"
-                            badgeContent={_.size(org?.subordinates)}
-                            onClick={onCollapse}
-                        >
-                            <Avatar className={classes.avatar}>
-                                <BusinessIcon color="primary" />
-                            </Avatar>
-                        </Badge>
-                    </Tooltip>
+                    <Badge
+                    // style={{ cursor: "pointer" }}
+                    // color="secondary"
+                    // anchorOrigin={{
+                    //     vertical: "bottom",
+                    //     horizontal: "right"
+                    // }}
+                    // showZero
+                    // invisible={!collapsed}
+                    // overlap="circle"
+                    // badgeContent={_.size(org?.subordinates)}
+                    // onClick={onCollapse}
+                    >
+                        <Avatar className={classes.avatar}>
+                            <BusinessIcon color="primary" />
+                        </Avatar>
+                    </Badge>
                 }
-                title={org?.name + ' (' + org?.designation + ')'}
+                title={isLoadingHeirarchy ?
+                    <p style={{ fontStyle: "italic", color: "#aaa" }}>
+                        <FontAwesomeIcon icon={faSpinner} spin /> Loading...
+                    </p> : org?.name != undefined ? org?.name + ' (' + org?.designation + ')'
+                        : <p style={{ fontStyle: "italic", color: "#aaa" }}>
+                            Data Is Currently Unavailable
+                        </p>}
 
             />
         </Card>
@@ -220,7 +227,7 @@ const theme = createMuiTheme({
 });
 
 const Hierarchy = () => {
-    const { hierarchy } = useSelector((state) => state.viewHierarchy);
+    const { hierarchy, isLoadingHeirarchy } = useSelector((state) => state.viewHierarchy);
     const dispatch = useDispatch();
 
     useEffect(() => {

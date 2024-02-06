@@ -50,9 +50,11 @@ import { useEffect, useState } from "react";
 import Modal from "react-bootstrap/Modal";
 import Form from "react-bootstrap/Form";
 import Button from "react-bootstrap/Button";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faSpinner } from '@fortawesome/free-solid-svg-icons'
 
 const Projects = () => {
-  const { projects } = useSelector((state) => state.projectList);
+  const { projects, isLoadingProject } = useSelector((state) => state.projectList);
   console.log("Projects List in Main", projects);
   const { teams } = useSelector((state) => state.teamsList);
   const navigate = useNavigate();
@@ -73,6 +75,8 @@ const Projects = () => {
   const closeHandle2 = () => setEditShow(false);
   const dispatch = useDispatch();
   const [selectedTeams, setSelectedTeams] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
 
   const teamOptions = teams.map((team) => ({
     value: team.id,
@@ -186,6 +190,13 @@ const Projects = () => {
     dispatch(getTeamData());
   }, []);
 
+  // Pagination
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = projects.slice(indexOfFirstItem, indexOfLastItem);
+
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
+
   return (
     <>
       <UserHeader />
@@ -214,205 +225,188 @@ const Projects = () => {
                   </Col>
                 </Row>
               </CardHeader>
-              <Table className="align-items-center table-flush" responsive>
-                <thead className="thead-light">
-                  <tr>
-                    <th scope="col">ID</th>
-                    <th scope="col">Name</th>
-                    <th scope="col">Teams</th>
-                    <th scope="col" />
-                  </tr>
-                </thead>
-                <tbody>
-                  {projects !== undefined &&
-                    projects.map((item, index) => (
-                      <tr key={index}>
-                        <th>{item.id}</th>
-                        <th>{item.name}</th>
-                        <th><Button className="tableButton" onClick={() => handleTeamsClick(item.id, index)}>View Teams</Button></th>
-                        <th className="text-right">
-                          <UncontrolledDropdown>
-                            <DropdownToggle
-                              className="btn-icon-only text-light"
-                              href="#pablo"
-                              role="button"
-                              size="sm"
-                              color=""
-                              onClick={(e) => e.preventDefault()}
-                            >
-                              <i className="fas fa-ellipsis-v" />
-                            </DropdownToggle>
-                            <DropdownMenu className="dropdown-menu-arrow" right>
-                              <DropdownItem
+              <div style={{ height: '410px' }} >
+                <Table className="align-items-center table-flush" responsive>
+                  <thead className="thead-light">
+                    <tr>
+                      <th scope="col">ID</th>
+                      <th scope="col">Name</th>
+                      <th scope="col">Teams</th>
+                      <th scope="col" />
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {isLoadingProject ?
+                      <tr>
+                        <td colSpan="5" style={{ textAlign: "center" }}>
+                          <p style={{ fontStyle: "italic", color: "#aaa" }}>
+                            <FontAwesomeIcon icon={faSpinner} spin /> Loading... Please Wait
+                          </p>
+                        </td>
+                      </tr>
+                      : currentItems.map((item, index) => (
+                        <tr key={index}>
+                          <th>{item.id}</th>
+                          <th>{item.name}</th>
+                          <th><Button className="tableButton" onClick={() => handleTeamsClick(item.id, index)}>View Teams</Button></th>
+                          <th className="text-right">
+                            <UncontrolledDropdown>
+                              <DropdownToggle
+                                className="btn-icon-only text-light"
                                 href="#pablo"
-                                onClick={() => handleButtonClick(item)}
+                                role="button"
+                                size="sm"
+                                color=""
+                                onClick={(e) => e.preventDefault()}
                               >
-                                Edit
-                              </DropdownItem>
-                              <DropdownItem
-                                href="#pablo"
-                                onClick={() => deleteProject(item.id)}
-                              >
-                                Delete
-                              </DropdownItem>
-                              {/* <DropdownItem
+                                <i className="fas fa-ellipsis-v" />
+                              </DropdownToggle>
+                              <DropdownMenu className="dropdown-menu-arrow" right>
+                                <DropdownItem
+                                  href="#pablo"
+                                  onClick={() => handleButtonClick(item)}
+                                >
+                                  Edit
+                                </DropdownItem>
+                                <DropdownItem
+                                  href="#pablo"
+                                  onClick={() => deleteProject(item.id)}
+                                >
+                                  Delete
+                                </DropdownItem>
+                                {/* <DropdownItem
                                 href="#pablo"
                                 onClick={(e) => e.preventDefault()}
                               >
                                 Something else here
                               </DropdownItem> */}
-                            </DropdownMenu>
-                          </UncontrolledDropdown>
-                        </th>
-                      </tr>
-                    ))}
-                  <tr>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                  </tr>
+                              </DropdownMenu>
+                            </UncontrolledDropdown>
+                          </th>
+                        </tr>
+                      ))}
+                    <tr>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                    </tr>
 
-                </tbody>
-                <Modal show={editShow} onHide={closeHandle2}>
-                  <Form onSubmit={handleSubmit}>
+                  </tbody>
+                  <Modal show={editShow} onHide={closeHandle2}>
+                    <Form onSubmit={handleSubmit}>
+                      <Modal.Header closeButton>
+                        <Modal.Title>Edit Form</Modal.Title>
+                      </Modal.Header>
+                      <Modal.Body>
+                        <Form.Group className="mb-3" controlId="Name">
+                          <Form.Label>Name</Form.Label>
+                          <Form.Control
+                            type="text" required
+                            placeholder="Enter Name"
+                            defaultValue={name || ""}
+                            onChange={(e) => setName(e.target.value)}
+                          />
+                        </Form.Group>
+                      </Modal.Body>
+                      <Modal.Footer>
+                        <Button
+                          variant="danger"
+                          type="submit"
+                          style={{ margin: "20px" }}
+                          onClick={() => updateProject(projectId, name)}
+                        // onClick={handleClose}
+                        >
+                          Save Changes
+                        </Button>
+                        <Button variant="secondary" onClick={closeHandle2}>
+                          Close
+                        </Button>
+                      </Modal.Footer>
+                    </Form>
+                  </Modal>
+
+                  <Modal show={view} onHide={closeHandle}>
                     <Modal.Header closeButton>
-                      <Modal.Title>Edit Form</Modal.Title>
+                      <Modal.Title>View</Modal.Title>
                     </Modal.Header>
                     <Modal.Body>
-                      <Form.Group className="mb-3" controlId="Name">
-                        <Form.Label>Name</Form.Label>
-                        <Form.Control
-                          type="text" required
-                          placeholder="Enter Name"
-                          defaultValue={name || ""}
-                          onChange={(e) => setName(e.target.value)}
-                        />
-                      </Form.Group>
-                    </Modal.Body>
-                    <Modal.Footer>
-                      <Button
-                        variant="danger"
-                        type="submit"
-                        style={{ margin: "20px" }}
-                        onClick={() => updateProject(projectId, name)}
-                      // onClick={handleClose}
-                      >
-                        Save Changes
-                      </Button>
-                      <Button variant="secondary" onClick={closeHandle2}>
-                        Close
-                      </Button>
-                    </Modal.Footer>
-                  </Form>
-                </Modal>
-
-                <Modal show={view} onHide={closeHandle}>
-                  <Modal.Header closeButton>
-                    <Modal.Title>View</Modal.Title>
-                  </Modal.Header>
-                  <Modal.Body>
-                    <Table className="align-items-center table-flush" responsive>
-                      <thead>
-                        <tr>
-                          <th>id</th>
-                          <th>Name</th>
-                          <th>Delete</th>
-                          {/* <th>Team Details</th> */}
-                        </tr>
-                        {/* {console.log(teamId)} */}
-                        {projects[projectInd]?.teams?.map((elem, index) => (
-                          <tr key={index} >
-                            <th>{elem.id}</th>
-                            <th>{elem.name}</th>
-                            <th><Button className="tableButton" onClick={() => deleteTeam(projectId, elem.id)}>Delete</Button></th>
-                            {/* <th><Button className="tableButton" onClick={() => teamMember(elem.id, projectId)}>View Members</Button></th> */}
+                      <Table className="align-items-center table-flush" responsive>
+                        <thead>
+                          <tr>
+                            <th>id</th>
+                            <th>Name</th>
+                            <th>Delete</th>
+                            {/* <th>Team Details</th> */}
                           </tr>
-                        ))}
-                      </thead>
-                    </Table>
-                  </Modal.Body>
-                  <Modal.Footer style={{ "display": "block" }}>
-                    {teamField ? (
-                      <>
+                          {/* {console.log(teamId)} */}
+                          {projects[projectInd]?.teams?.map((elem, index) => (
+                            <tr key={index} >
+                              <th>{elem.id}</th>
+                              <th>{elem.name}</th>
+                              <th><Button className="tableButton" onClick={() => deleteTeam(projectId, elem.id)}>Delete</Button></th>
+                              {/* <th><Button className="tableButton" onClick={() => teamMember(elem.id, projectId)}>View Members</Button></th> */}
+                            </tr>
+                          ))}
+                        </thead>
+                      </Table>
+                    </Modal.Body>
+                    <Modal.Footer style={{ "display": "block" }}>
+                      {teamField ? (
+                        <>
 
-                        <Form>
-                          <Form.Group className="mb-3" controlId="teamDropdown">
-                            <Form.Label>Teams</Form.Label>
-                            <Select
-                              styles={customStyles}
-                              isMulti
-                              value={selectedTeams.map((teamId) => teamOptions.find((team) => team.value === teamId))}
-                              onChange={(selected) => setSelectedTeams(selected.map((team) => team.value))}
-                              options={teamOptions.filter((team) => !projects[projectInd]?.teams?.some((elem) => elem.id === team.value))}
-                            />
-                          </Form.Group>
+                          <Form>
+                            <Form.Group className="mb-3" controlId="teamDropdown">
+                              <Form.Label>Teams</Form.Label>
+                              <Select
+                                styles={customStyles}
+                                isMulti
+                                value={selectedTeams.map((teamId) => teamOptions.find((team) => team.value === teamId))}
+                                onChange={(selected) => setSelectedTeams(selected.map((team) => team.value))}
+                                options={teamOptions.filter((team) => !projects[projectInd]?.teams?.some((elem) => elem.id === team.value))}
+                              />
+                            </Form.Group>
+                            <div style={{ display: "flex", justifyContent: "center" }}>
+                              <Button variant="danger" onClick={saveTeam}>
+                                SAVE
+                              </Button>
+                            </div>
+                          </Form>
+                        </>
+                      ) : (
+                        <>
                           <div style={{ display: "flex", justifyContent: "center" }}>
-                            <Button variant="danger" onClick={saveTeam}>
-                              SAVE
+                            <Button variant="danger" onClick={() => setTeamField(!teamField)}>
+                              ADD TEAM
                             </Button>
                           </div>
-                        </Form>
-                      </>
-                    ) : (
-                      <>
-                        <div style={{ display: "flex", justifyContent: "center" }}>
-                          <Button variant="danger" onClick={() => setTeamField(!teamField)}>
-                            ADD TEAM
-                          </Button>
-                        </div>
-                      </>)}
-                  </Modal.Footer>
-                </Modal>
-              </Table>
+                        </>)}
+                    </Modal.Footer>
+                  </Modal>
+                </Table>
+              </div>
               <CardFooter className="py-4">
                 <nav aria-label="...">
-                  <Pagination
-                    className="pagination justify-content-end mb-0"
-                    listClassName="justify-content-end mb-0"
-                  >
-                    <PaginationItem className="disabled">
-                      <PaginationLink
-                        href="#pablo"
-                        onClick={(e) => e.preventDefault()}
-                        tabIndex="-1"
-                      >
-                        <i className="fas fa-angle-left" />
-                        <span className="sr-only">Previous</span>
-                      </PaginationLink>
+                  <Pagination className="pagination justify-content-end mb-0" listClassName="justify-content-end mb-0">
+                    <PaginationItem className={currentPage === 1 ? "disabled" : ""}>
+                      <PaginationLink previous href="#" onClick={(e) => { e.preventDefault(); paginate(currentPage - 1) }} />
                     </PaginationItem>
-                    <PaginationItem className="active">
-                      <PaginationLink
-                        href="#pablo"
-                        onClick={(e) => e.preventDefault()}
-                      >
-                        1
-                      </PaginationLink>
-                    </PaginationItem>
-                    <PaginationItem>
-                      <PaginationLink
-                        href="#pablo"
-                        onClick={(e) => e.preventDefault()}
-                      >
-                        2 <span className="sr-only">(current)</span>
-                      </PaginationLink>
-                    </PaginationItem>
-                    <PaginationItem>
-                      <PaginationLink
-                        href="#pablo"
-                        onClick={(e) => e.preventDefault()}
-                      >
-                        3
-                      </PaginationLink>
-                    </PaginationItem>
-                    <PaginationItem>
-                      <PaginationLink
-                        href="#pablo"
-                        onClick={(e) => e.preventDefault()}
-                      >
-                        <i className="fas fa-angle-right" />
-                        <span className="sr-only">Next</span>
-                      </PaginationLink>
+                    {Array.from({ length: Math.ceil(projects.length / itemsPerPage) }, (_, i) => {
+                      const isCurrent = i + 1 === currentPage;
+                      const isLast = i + 1 === Math.ceil(projects.length / itemsPerPage);
+                      const isFirst = i === 0;
+                      return (
+                        (isFirst || isLast || isCurrent) && (
+                          <PaginationItem key={i} className={isCurrent ? "active" : ""}>
+                            <PaginationLink href="#" onClick={() => paginate(i + 1)}>
+                              {i + 1}
+                            </PaginationLink>
+                          </PaginationItem>
+                        )
+                      );
+                    })}
+                    <PaginationItem className={currentPage === Math.ceil(projects.length / itemsPerPage) ? "disabled" : ""}>
+                      <PaginationLink next href="#" onClick={(e) => { e.preventDefault(); paginate(currentPage + 1) }} />
                     </PaginationItem>
                   </Pagination>
                 </nav>
