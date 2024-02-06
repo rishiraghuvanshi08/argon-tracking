@@ -17,7 +17,7 @@
 */
 /*eslint-disable*/
 import { useState } from "react";
-import { NavLink as NavLinkRRD, Link } from "react-router-dom";
+import { NavLink as NavLinkRRD, Link, useNavigate } from "react-router-dom";
 // nodejs library to set properties for components
 import { PropTypes } from "prop-types";
 
@@ -51,11 +51,14 @@ import {
   Row,
   Col,
 } from "reactstrap";
+import Swal from "sweetalert2";
+import { DoLogout } from "../../Authentication";
 
 var ps;
 
 const Sidebar = (props) => {
-  const [collapseOpen, setCollapseOpen] = useState();
+  const [collapseOpen, setCollapseOpen] = useState();  
+  const navigate = useNavigate();
   // verifies if routeName is the one active (in browser input)
   const activeRoute = (routeName) => {
     return props.location.pathname.indexOf(routeName) > -1 ? "active" : "";
@@ -98,6 +101,22 @@ const Sidebar = (props) => {
       href: logo.outterLink,
       target: "_blank",
     };
+  }
+
+  const handleLogout = () => {
+    Swal.fire({
+      title: 'Do you want to log out?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085D6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, LogOut'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        DoLogout();
+        navigate("/auth/login");
+      }
+    })
   }
 
   return (
@@ -147,7 +166,7 @@ const Sidebar = (props) => {
                 <span>My profile</span>
               </DropdownItem>
               <DropdownItem divider />
-              <DropdownItem href="#pablo" onClick={(e) => e.preventDefault()}>
+              <DropdownItem href="#pablo" onClick={(e) => {e.preventDefault();  handleLogout()}}>
                 <i className="ni ni-user-run" />
                 <span>Logout</span>
               </DropdownItem>
