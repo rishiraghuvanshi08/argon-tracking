@@ -42,11 +42,15 @@ import { useSelector, useDispatch } from "react-redux";
 import { useEffect, useState } from "react";
 import { getUsersDataId } from "../../Slices/LoginUserSlice";
 import { getUserTeamData } from "../../Slices/TeamSlice";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faSpinner } from '@fortawesome/free-solid-svg-icons'
 
 const UserTeams = () => {
 
-    const { teams } = useSelector((state) => state.teamsList);
+    const { teams, isLoadingTeam } = useSelector((state) => state.teamsList);
     const dispatch = useDispatch();
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 5;
 
     const data = localStorage.getItem('data');
     const parsedData = data ? JSON.parse(data) : null;
@@ -72,6 +76,13 @@ const UserTeams = () => {
     //   return <div>Error: {teamsError.message}</div>;
     // }
 
+    // Pagination
+    const indexOfLastItem = currentPage * itemsPerPage;
+    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+    const currentItems = teams.slice(indexOfFirstItem, indexOfLastItem);
+
+    const paginate = (pageNumber) => setCurrentPage(pageNumber);
+
     return (
         <>
             <UserHeader />
@@ -95,8 +106,15 @@ const UserTeams = () => {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {teams !== undefined &&
-                                        teams.map((item, index) => (
+                                    {isLoadingTeam ?
+                                        <tr>
+                                            <td colSpan="5" style={{ textAlign: "center" }}>
+                                                <p style={{ fontStyle: "italic", color: "#aaa" }}>
+                                                    <FontAwesomeIcon icon={faSpinner} spin /> Loading... Please Wait
+                                                </p>
+                                            </td>
+                                        </tr>
+                                        : currentItems.map((item, index) => (
                                             <tr key={index}>
                                                 <th>{item.id}</th>
                                                 <th>{item.name}</th>
@@ -111,52 +129,26 @@ const UserTeams = () => {
                             </Table>
                             <CardFooter className="py-4">
                                 <nav aria-label="...">
-                                    <Pagination
-                                        className="pagination justify-content-end mb-0"
-                                        listClassName="justify-content-end mb-0"
-                                    >
-                                        <PaginationItem className="disabled">
-                                            <PaginationLink
-                                                href="#pablo"
-                                                onClick={(e) => e.preventDefault()}
-                                                tabIndex="-1"
-                                            >
-                                                <i className="fas fa-angle-left" />
-                                                <span className="sr-only">Previous</span>
-                                            </PaginationLink>
+                                    <Pagination className="pagination justify-content-end mb-0" listClassName="justify-content-end mb-0">
+                                        <PaginationItem className={currentPage === 1 ? "disabled" : ""}>
+                                            <PaginationLink previous href="#" onClick={(e) => { e.preventDefault(); paginate(currentPage - 1) }} />
                                         </PaginationItem>
-                                        <PaginationItem className="active">
-                                            <PaginationLink
-                                                href="#pablo"
-                                                onClick={(e) => e.preventDefault()}
-                                            >
-                                                1
-                                            </PaginationLink>
-                                        </PaginationItem>
-                                        <PaginationItem>
-                                            <PaginationLink
-                                                href="#pablo"
-                                                onClick={(e) => e.preventDefault()}
-                                            >
-                                                2 <span className="sr-only">(current)</span>
-                                            </PaginationLink>
-                                        </PaginationItem>
-                                        <PaginationItem>
-                                            <PaginationLink
-                                                href="#pablo"
-                                                onClick={(e) => e.preventDefault()}
-                                            >
-                                                3
-                                            </PaginationLink>
-                                        </PaginationItem>
-                                        <PaginationItem>
-                                            <PaginationLink
-                                                href="#pablo"
-                                                onClick={(e) => e.preventDefault()}
-                                            >
-                                                <i className="fas fa-angle-right" />
-                                                <span className="sr-only">Next</span>
-                                            </PaginationLink>
+                                        {Array.from({ length: Math.ceil(teams.length / itemsPerPage) }, (_, i) => {
+                                            const isCurrent = i + 1 === currentPage;
+                                            const isLast = i + 1 === Math.ceil(teams.length / itemsPerPage);
+                                            const isFirst = i === 0;
+                                            return (
+                                                (isFirst || isLast || isCurrent) && (
+                                                    <PaginationItem key={i} className={isCurrent ? "active" : ""}>
+                                                        <PaginationLink href="#" onClick={() => paginate(i + 1)}>
+                                                            {i + 1}
+                                                        </PaginationLink>
+                                                    </PaginationItem>
+                                                )
+                                            );
+                                        })}
+                                        <PaginationItem className={currentPage === Math.ceil(teams.length / itemsPerPage) ? "disabled" : ""}>
+                                            <PaginationLink next href="#" onClick={(e) => { e.preventDefault(); paginate(currentPage + 1) }} />
                                         </PaginationItem>
                                     </Pagination>
                                 </nav>

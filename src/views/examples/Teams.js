@@ -51,10 +51,12 @@ import Button from "react-bootstrap/Button";
 import { toast } from "react-toastify";
 import { getUsersData } from "../../Slices/UserSlices";
 import TeamMemberModal from "./TeamMemberModal";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faSpinner } from '@fortawesome/free-solid-svg-icons'
 
 const Teams = () => {
 
-  const { teams, isTeamsLoading, teamsError } = useSelector((state) => state.teamsList);
+  const { teams, isLoadingTeam, teamsError } = useSelector((state) => state.teamsList);
   const { teamMember } = useSelector((state) => state.teaMemberList);
   console.log(teams);
   const navigate = useNavigate();
@@ -74,6 +76,8 @@ const Teams = () => {
   }));
   const [teamObject, setTeamObject] = useState("");
   const [addMemberCheck, setAddMemberCheck] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
 
   const customStyles = {
     control: (provided, state) => ({
@@ -182,6 +186,13 @@ const Teams = () => {
   //   return <div>Error: {teamsError.message}</div>;
   // }
 
+  // Pagination
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = teams.slice(indexOfFirstItem, indexOfLastItem);
+
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
+
   return (
     <>
       <UserHeader />
@@ -210,109 +221,92 @@ const Teams = () => {
                   </Col>
                 </Row>
               </CardHeader>
-              <Table className="align-items-center table-flush" responsive>
-                <thead className="thead-light">
-                  <tr>
-                    <th scope="col">ID</th>
-                    <th scope="col">Name</th>
-                    <th scope="col">View Members</th>
-                    <th scope="col" />
-                  </tr>
-                </thead>
-                <tbody>
-                  {teams !== undefined &&
-                    teams.map((item, index) => (
-                      <tr key={index}>
-                        <th>{item.id}</th>
-                        <th>{item.name}</th>
-                        <th><Button className="tableButton" onClick={() => teamMember1(item)}>View Members</Button></th>
-                        <th className="text-right">
-                          <UncontrolledDropdown>
-                            <DropdownToggle
-                              className="btn-icon-only text-light"
-                              href="#pablo"
-                              role="button"
-                              size="sm"
-                              color=""
-                              onClick={(e) => e.preventDefault()}
-                            >
-                              <i className="fas fa-ellipsis-v" />
-                            </DropdownToggle>
-                            <DropdownMenu className="dropdown-menu-arrow" right>
-                              <DropdownItem
-                                href="#pablo"
-                                onClick={() => handleButtonClick(item)}
-                              >
-                                Edit
-                              </DropdownItem>
-                              <DropdownItem
-                                href="#pablo"
-                                disabled
-                              >
-                                Delete
-                              </DropdownItem>
-                            </DropdownMenu>
-                          </UncontrolledDropdown>
-                        </th>
+              <div style={{ height: '410px' }} >
+                <Table className="align-items-center table-flush" responsive>
+                  <thead className="thead-light">
+                    <tr>
+                      <th scope="col">ID</th>
+                      <th scope="col">Name</th>
+                      <th scope="col">View Members</th>
+                      <th scope="col" />
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {isLoadingTeam ?
+                      <tr>
+                        <td colSpan="5" style={{ textAlign: "center" }}>
+                          <p style={{ fontStyle: "italic", color: "#aaa" }}>
+                            <FontAwesomeIcon icon={faSpinner} spin /> Loading... Please Wait
+                          </p>
+                        </td>
                       </tr>
-                    ))}
-                  <tr>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                  </tr>
+                      : currentItems.map((item, index) => (
+                        <tr key={index}>
+                          <th>{item.id}</th>
+                          <th>{item.name}</th>
+                          <th><Button className="tableButton" onClick={() => teamMember1(item)}>View Members</Button></th>
+                          <th className="text-right">
+                            <UncontrolledDropdown>
+                              <DropdownToggle
+                                className="btn-icon-only text-light"
+                                href="#pablo"
+                                role="button"
+                                size="sm"
+                                color=""
+                                onClick={(e) => e.preventDefault()}
+                              >
+                                <i className="fas fa-ellipsis-v" />
+                              </DropdownToggle>
+                              <DropdownMenu className="dropdown-menu-arrow" right>
+                                <DropdownItem
+                                  href="#pablo"
+                                  onClick={() => handleButtonClick(item)}
+                                >
+                                  Edit
+                                </DropdownItem>
+                                <DropdownItem
+                                  href="#pablo"
+                                  disabled
+                                >
+                                  Delete
+                                </DropdownItem>
+                              </DropdownMenu>
+                            </UncontrolledDropdown>
+                          </th>
+                        </tr>
+                      ))}
+                    <tr>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                    </tr>
 
-                </tbody>
-              </Table>
+                  </tbody>
+                </Table>
+              </div>
               <CardFooter className="py-4">
                 <nav aria-label="...">
-                  <Pagination
-                    className="pagination justify-content-end mb-0"
-                    listClassName="justify-content-end mb-0"
-                  >
-                    <PaginationItem className="disabled">
-                      <PaginationLink
-                        href="#pablo"
-                        onClick={(e) => e.preventDefault()}
-                        tabIndex="-1"
-                      >
-                        <i className="fas fa-angle-left" />
-                        <span className="sr-only">Previous</span>
-                      </PaginationLink>
+                  <Pagination className="pagination justify-content-end mb-0" listClassName="justify-content-end mb-0">
+                    <PaginationItem className={currentPage === 1 ? "disabled" : ""}>
+                      <PaginationLink previous href="#" onClick={(e) => { e.preventDefault(); paginate(currentPage - 1) }} />
                     </PaginationItem>
-                    <PaginationItem className="active">
-                      <PaginationLink
-                        href="#pablo"
-                        onClick={(e) => e.preventDefault()}
-                      >
-                        1
-                      </PaginationLink>
-                    </PaginationItem>
-                    <PaginationItem>
-                      <PaginationLink
-                        href="#pablo"
-                        onClick={(e) => e.preventDefault()}
-                      >
-                        2 <span className="sr-only">(current)</span>
-                      </PaginationLink>
-                    </PaginationItem>
-                    <PaginationItem>
-                      <PaginationLink
-                        href="#pablo"
-                        onClick={(e) => e.preventDefault()}
-                      >
-                        3
-                      </PaginationLink>
-                    </PaginationItem>
-                    <PaginationItem>
-                      <PaginationLink
-                        href="#pablo"
-                        onClick={(e) => e.preventDefault()}
-                      >
-                        <i className="fas fa-angle-right" />
-                        <span className="sr-only">Next</span>
-                      </PaginationLink>
+                    {Array.from({ length: Math.ceil(teams.length / itemsPerPage) }, (_, i) => {
+                      const isCurrent = i + 1 === currentPage;
+                      const isLast = i + 1 === Math.ceil(teams.length / itemsPerPage);
+                      const isFirst = i === 0;
+                      return (
+                        (isFirst || isLast || isCurrent) && (
+                          <PaginationItem key={i} className={isCurrent ? "active" : ""}>
+                            <PaginationLink href="#" onClick={() => paginate(i + 1)}>
+                              {i + 1}
+                            </PaginationLink>
+                          </PaginationItem>
+                        )
+                      );
+                    })}
+                    <PaginationItem className={currentPage === Math.ceil(teams.length / itemsPerPage) ? "disabled" : ""}>
+                      <PaginationLink next href="#" onClick={(e) => { e.preventDefault(); paginate(currentPage + 1) }} />
                     </PaginationItem>
                   </Pagination>
                 </nav>
@@ -399,7 +393,7 @@ const Teams = () => {
         memberShow={memberShow}
         handleClose={handleClose}
         teamObject={teamObject}
-        addMemberCheck={addMemberCheck} 
+        addMemberCheck={addMemberCheck}
         setAddMemberCheck={setAddMemberCheck}
         teams={teams}
       />

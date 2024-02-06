@@ -19,11 +19,13 @@
 // reactstrap components
 import { useSelector } from "react-redux";
 import { Card, CardBody, CardTitle, Container, Row, Col } from "reactstrap";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faSpinner } from '@fortawesome/free-solid-svg-icons'
 
 const UserPrivateHeader = () => {
 
-    const { projects } = useSelector((state) => state.projectList);
-    const { teams } = useSelector((state) => state.teamsList);
+    const { projects, isLoadingProject } = useSelector((state) => state.projectList);
+    const { teams, isLoadingTeam } = useSelector((state) => state.teamsList);
     const totalProjects = projects.length;
     const totalTeams = teams.length;
 
@@ -72,7 +74,11 @@ const UserPrivateHeader = () => {
                                                 >
                                                     Active Projects
                                                 </CardTitle>
-                                                <span className="h2 font-weight-bold mb-0">{totalProjects}</span>
+                                                <span className="h2 font-weight-bold mb-0">
+                                                    {isLoadingProject ?
+                                                        <p style={{ fontStyle: "italic", color: "#aaa" }}>
+                                                            <FontAwesomeIcon icon={faSpinner} spin />
+                                                        </p> : totalProjects}</span>
                                             </div>
                                             <Col className="col-auto">
                                                 <div className="icon icon-shape bg-warning text-white rounded-circle shadow">
@@ -100,7 +106,11 @@ const UserPrivateHeader = () => {
                                                 >
                                                     My Teams
                                                 </CardTitle>
-                                                <span className="h2 font-weight-bold mb-0">{totalTeams}</span>
+                                                <span className="h2 font-weight-bold mb-0">
+                                                    {isLoadingTeam ?
+                                                        <p style={{ fontStyle: "italic", color: "#aaa" }}>
+                                                            <FontAwesomeIcon icon={faSpinner} spin />
+                                                        </p> : totalTeams}</span>
                                             </div>
                                             <Col className="col-auto">
                                                 <div className="icon icon-shape bg-yellow text-white rounded-circle shadow">
@@ -137,7 +147,7 @@ const UserPrivateHeader = () => {
                                             </Col>
                                         </Row>
                                         <p className="mt-3 mb-0 text-muted text-sm">
-                                           
+
                                             <span className="text-nowrap">Click On The Link Icon!</span>
                                         </p>
                                     </CardBody>
