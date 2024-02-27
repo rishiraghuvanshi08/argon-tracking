@@ -244,7 +244,7 @@ const Projects = () => {
                           </p>
                         </td>
                       </tr>
-                      : currentItems.length > 0 && currentItems.map((item, index) => (
+                      : currentItems.map((item, index) => (
                         <tr key={index}>
                           <th>{item.id}</th>
                           <th>{item.name}</th>
