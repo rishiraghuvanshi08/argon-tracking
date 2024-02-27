@@ -3,8 +3,7 @@ import Swal from 'sweetalert2';
 import setAuthToken from './setAuthToken';
 
 // export const API_BASE_URL = "http://localhost:8080";
-export const API_BASE_URL = "https://54.208.110.131:8080";
-// export const API_BASE_URL = "https://grappler-backend-rest-api-production.up.railway.app";
+export const API_BASE_URL = "https://argon-tracking.onrender.com";
 
 // isLoggedIn =>
 export const IsLoggedIn = () => {
