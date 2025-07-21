@@ -3,7 +3,7 @@ import Swal from 'sweetalert2';
 import setAuthToken from './setAuthToken';
 
 // export const API_BASE_URL = "http://localhost:8080";
-export const API_BASE_URL = "https://argon-tracking.onrender.com";
+export const API_BASE_URL = "https://argon-backend-ggd8.onrender.com";
 
 // isLoggedIn =>
 export const IsLoggedIn = () => {
